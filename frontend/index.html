@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Photo Booth</title>
+
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    h1 {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+
+    #countdown {
+      font-size: 120px;
+      margin: 40px 0;
+      display: none;
+    }
+
+    button {
+      font-size: 36px;
+      padding: 20px 60px;
+      cursor: pointer;
+      border: none;
+      border-radius: 10px;
+      background: #ff4081;
+      color: white;
+    }
+
+    button:disabled {
+      background: gray;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>📸 Photo Booth</h1>
+
+  <div id="countdown">3</div>
+
+  <button id="startBtn" onclick="startBooth()">START</button>
+
+<script>
+  const backendUrl = "http://localhost:8081/start";
+
+  async function startBooth() {
+    const btn = document.getElementById("startBtn");
+    const countdown = document.getElementById("countdown");
+
+    btn.disabled = true;
+    countdown.style.display = "block";
+
+    // 🔹 Start backend immediately
+    fetch(backendUrl, { method: "POST" })
+      .then(res => res.json())
+      .then(() => {
+        alert("✅ Printing started!");
+        btn.disabled = false;
+      })
+      .catch(() => {
+        alert("❌ Backend error");
+        btn.disabled = false;
+      });
+
+    // 🔹 Initial countdown before first photo (5 → 1)
+    for (let i = 5; i >= 1; i--) {
+      countdown.innerText = i;
+      await sleep(1000);
+    }
+
+    showFlash(countdown);
+
+    // 🔹 Countdown between remaining 3 photos
+    for (let photo = 2; photo <= 4; photo++) {
+      for (let i = 3; i >= 1; i--) {
+        countdown.innerText = i;
+        await sleep(1000);
+      }
+      showFlash(countdown);
+    }
+
+    countdown.style.display = "none";
+  }
+
+  function showFlash(el) {
+    el.innerText = "📸";
+    el.style.opacity = "0.3";
+    setTimeout(() => {
+      el.style.opacity = "1";
+    }, 200);
+  }
+
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+</script>
+
+
+</body>
+</html>
